@@ -9,6 +9,7 @@ Python-based proof of concept for a robot controller that cycles through waypoin
 
 ## Running
 Requires Python 3.9+.
+Tested with Python 3.12 (virtual environment)
 
 ```bash
 python main.py
