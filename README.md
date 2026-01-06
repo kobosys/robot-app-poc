@@ -15,3 +15,8 @@ python main.py
 ```
 
 The example run will cycle through waypoints A, B, and C. A background thread sends periodic heartbeats; once they stop, the watchdog triggers `stop()` to halt the controller.
+
+## Robot Control
+This project uses Slamware REST API v1.1.
+See docs/slamware_api_index.md.
+
