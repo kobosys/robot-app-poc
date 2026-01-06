@@ -7,10 +7,13 @@ class Watchdog:
     """A simple watchdog timer that triggers a callback on timeout."""
 
     def __init__(self, timeout_seconds: float, on_timeout: Callable[[], None]):
+        if timeout_seconds <= 0:
+            raise ValueError("Watchdog timeout must be greater than zero")
         self.timeout_seconds = timeout_seconds
         self.on_timeout = on_timeout
         self._last_feed: Optional[float] = None
         self._active = False
+        self._stop_event = threading.Event()
         self._thread: Optional[threading.Thread] = None
 
     def start(self) -> None:
@@ -18,6 +21,7 @@ class Watchdog:
         if self._active:
             return
         self._active = True
+        self._stop_event.clear()
         self._last_feed = time.monotonic()
         self._thread = threading.Thread(target=self._run, daemon=True)
         self._thread.start()
@@ -30,10 +34,15 @@ class Watchdog:
 
     def stop(self) -> None:
         """Stop the watchdog thread."""
+        if not self._active:
+            return
         self._active = False
+        self._stop_event.set()
+        if self._thread and self._thread.is_alive():
+            self._thread.join(timeout=1)
 
     def _run(self) -> None:
-        while self._active:
+        while not self._stop_event.is_set():
             if self._last_feed is None:
                 break
             elapsed = time.monotonic() - self._last_feed
